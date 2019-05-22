@@ -37,7 +37,7 @@ public:
     static void destory()
     {
         if(_plog){
-            _plog->_category.info("Mylog destory");
+            _plog->_category.info(suffix("Mylog destory"));
             _plog->_category.shutdown();
             delete _plog;
         }
@@ -50,7 +50,7 @@ public:
     void debug(const char * msg);
 private:
     Mylog();
-    ~Mylog();
+    ~Mylog(){}
 private:
     static Mylog * _plog;
     Category & _category;
@@ -72,11 +72,11 @@ Mylog::Mylog()
     RollingFileAppender * rollingFileAppender = new RollingFileAppender("rollingFileAppender","my.log",1024,3);
     rollingFileAppender->setLayout(patternlayout2);
 
-    _category.setPriority(Priority::ERROR);
+    _category.setPriority(Priority::DEBUG);
     _category.setAppender(ostreamAppender);
     _category.addAppender(rollingFileAppender);
 
-    _category.info("Mylog created!");
+    _category.info(suffix("Mylog created!"));
 }
 
 void Mylog::setPriority(Pri p){
@@ -116,6 +116,7 @@ int main()
 {
     Mylog * log = Mylog::getInstance();
     log->error(suffix("this is a error message"));
+    log->destory();
     return 0;
 }
 
