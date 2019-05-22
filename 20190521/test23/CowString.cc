@@ -4,23 +4,6 @@ using namespace std;
 
 class CowString
 {
-public:
-    class charProxy;
-    CowString();
-    CowString(const char * pstr);
-    CowString(const CowString & rhs);
-    CowString & operator=(const CowString & rhs);
-    ~CowString();
-
-    const char * c_str() const {    return _pstr;   }
-    int size() const {  return strlen(_pstr);   }
-    int refcount() {    return *((int*)(_pstr-4));  }
-    //char & operator[](int idx);
-    //CowString::charProxy operator[](int index);
-    //charProxy & operator=(char ch)
-
-    friend ostream & operator<<(ostream & os, const CowString & rhs);
-    //------------------
     class charProxy
     {
     public:
@@ -31,28 +14,7 @@ public:
             cout<<"charProxy(CowString &,int)"<<endl;
         }
 
-        char & operator=(char ch)
-        {
-            cout<<"char & operator=(char)"<<endl;
-            if(_index>=0 && _index<_str.size()){
-                if(_str.refcount()>1){
-                    _str.decreaseRefcount();
-
-                    char * ptmp = new char[_str.size()+5]()+4;
-                    strcpy(ptmp,_str._pstr);
-                    _str._pstr=ptmp;
-                    _str.initRefcount();
-                    _str._pstr[_index]=ch;
-                }
-                return _str._pstr[_index];
-            }else{
-                cout<<"下标越界！"<<endl;
-                static char nullchar = '\0';
-                return nullchar;
-            }
-        }
-        charProxy operator[](int index);
-
+        char & operator=(const char & ch);
         operator char()
         {
             cout<<"operator char()"<<endl;
@@ -62,11 +24,19 @@ public:
         CowString & _str;
         int _index;
     };
-    charProxy operator[](int index)
-    {
-        return charProxy(*this,index);
-    }
-    //----------------
+public:
+    CowString();
+    CowString(const char * pstr);
+    CowString(const CowString & rhs);
+    CowString & operator=(const CowString & rhs);
+    ~CowString();
+
+    const char * c_str() const {    return _pstr;   }
+    int size() const {  return strlen(_pstr);   }
+    int refcount() const {    return *((int*)(_pstr-4));  }
+
+    friend ostream & operator<<(ostream & os, const CowString & rhs);
+    charProxy operator[](int index);
 private:
     void initRefcount() {   *((int*)(_pstr-4))=1;   }
     void increaseRefcount() {   ++*((int*)(_pstr-4));   }
@@ -80,7 +50,6 @@ private:
         }
     }
     char * _pstr;
-    friend class charProxy;
 };
 
 CowString::CowString()
@@ -142,6 +111,33 @@ char & CowString::operator[](int idx)
     }
 }
 #endif
+
+CowString::charProxy CowString::operator[](int idx)
+{
+    return charProxy(*this,idx);
+}
+
+char & CowString::charProxy::operator=(const char & ch)
+{
+    int sz = _str.size();
+    if(_index >= 0 && _index < sz){
+        if(_str.refcount() > 1){
+            _str.decreaseRefcount();
+
+            char * ptmp = new char[sz + 5]() + 4;
+            strcpy(ptmp, _str._pstr);
+            _str._pstr = ptmp;
+            _str.initRefcount();
+        }
+        _str._pstr[_index] = ch;
+        return _str._pstr[_index];
+    }else{
+        cout<<"下标越界!"<<endl;
+        static char nullchar = '\0';
+        return nullchar;
+    }
+}
+
 ostream & operator<<(ostream & os, const CowString & rhs)
 {
     os<<rhs._pstr;

@@ -23,7 +23,7 @@ inline string int2string(int line){
     .append(__FILE__).append(":").append(__func__).append(":")\
     .append(int2string(__LINE__)).append("##").c_str()
 
-class Mylog
+class Mylog//单例模式
 {
 public:
     static Mylog * getInstance()
