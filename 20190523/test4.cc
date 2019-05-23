@@ -8,7 +8,7 @@ public:
     : _number(number)
     , _health(health)
     {
-        total-=health;
+        //total-=health;
     }
 private:
     int _number;
